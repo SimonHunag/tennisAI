@@ -158,7 +158,8 @@ button:hover,
 .metric-grid,
 .callout-list,
 .pill-list,
-.issue-stack {
+.issue-stack,
+.report-picker {
     display: grid;
     gap: 18px;
 }
@@ -171,6 +172,10 @@ button:hover,
 
 .card {
     padding: 24px;
+}
+
+.report-picker-card {
+    margin-bottom: 22px;
 }
 
 .section-heading {
@@ -395,4 +400,94 @@ button:hover,
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+.report-picker {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.report-chip {
+    display: grid;
+    gap: 6px;
+    text-align: left;
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: var(--paper-strong);
+    color: var(--ink);
+    box-shadow: none;
+}
+
+.report-chip-athlete {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-deep);
+}
+
+.report-chip-session {
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.report-chip.active {
+    background: rgba(196, 74, 44, 0.12);
+    border-color: rgba(196, 74, 44, 0.45);
+}
+
+.report-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+
+.report-search {
+    display: grid;
+    gap: 8px;
+    min-width: min(360px, 100%);
+    font-weight: 700;
+}
+
+.report-search span {
+    color: var(--accent-deep);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.report-search input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.88);
+    color: var(--ink);
+    font: inherit;
+}
+
+.report-group {
+    display: grid;
+    gap: 12px;
+}
+
+.report-group-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.report-group-meta {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.report-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
 }

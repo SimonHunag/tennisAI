@@ -1,9 +1,16 @@
-﻿const defaultDataPath = '../analysis/Serving_practice_1-serve-report.json';
+const params = new URLSearchParams(window.location.search);
+const requestedFile = params.get('file');
+const trainingSummaryPath = '../analysis/training-summary.json';
+let currentDataPath = requestedFile || null;
+let allServeSessions = [];
 
 const sourceStatus = document.getElementById('source-status');
 const helperText = document.getElementById('helper-text');
 const reloadButton = document.getElementById('reload-button');
 const uploadInput = document.getElementById('json-upload');
+const reportPicker = document.getElementById('report-picker');
+const reportSearch = document.getElementById('report-search');
+const reportPickerSummary = document.getElementById('report-picker-summary');
 const overallAssessment = document.getElementById('overall-assessment');
 const trainingPriorities = document.getElementById('training-priorities');
 const statsGrid = document.getElementById('stats-grid');
@@ -43,6 +50,109 @@ function formatSeconds(value) {
         return `${minutes}:${seconds.toFixed(1).padStart(4, '0')}`;
     }
     return `${seconds.toFixed(1)}s`;
+}
+
+function clearActiveReportButtons() {
+    document.querySelectorAll('.report-chip').forEach((node) => node.classList.remove('active'));
+}
+
+function summarizePicker(filteredCount, totalCount, keyword) {
+    if (!reportPickerSummary) {
+        return;
+    }
+
+    if (!totalCount) {
+        reportPickerSummary.textContent = '当前还没有可展示的发球报告。';
+        return;
+    }
+
+    if (keyword) {
+        reportPickerSummary.textContent = `共 ${totalCount} 份报告，当前匹配 ${filteredCount} 份`;
+        return;
+    }
+
+    reportPickerSummary.textContent = `当前共有 ${totalCount} 份发球报告，可按球员和日期快速切换`;
+}
+
+function groupSessionsByAthlete(sessions) {
+    const groups = new Map();
+    sessions.forEach((session) => {
+        const athleteKey = session.athlete || session.athlete_id || '未命名球员';
+        if (!groups.has(athleteKey)) {
+            groups.set(athleteKey, []);
+        }
+        groups.get(athleteKey).push(session);
+    });
+
+    return [...groups.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0], 'zh-CN'))
+        .map(([athlete, items]) => ({
+            athlete,
+            items: items.sort((a, b) => `${b.date || ''}${b.session_id || ''}`.localeCompare(`${a.date || ''}${a.session_id || ''}`)),
+        }));
+}
+
+function createReportChip(session) {
+    const filePath = `../${session.serve_report_json}`;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'report-chip';
+    button.dataset.path = filePath;
+    button.innerHTML = `
+        <span class="report-chip-athlete">${session.action_type || 'serve'}</span>
+        <span class="report-chip-session">${session.date || '-'} · ${session.session_id || '-'}</span>
+    `;
+    if (currentDataPath === filePath) {
+        button.classList.add('active');
+    }
+    button.addEventListener('click', () => {
+        history.replaceState({}, '', `?file=${encodeURIComponent(filePath)}`);
+        loadFromPath(filePath);
+    });
+    return button;
+}
+
+function renderReportPicker(sessions) {
+    clearNode(reportPicker);
+    const keyword = reportSearch ? reportSearch.value.trim().toLowerCase() : '';
+    const filtered = keyword
+        ? sessions.filter((session) => {
+            const haystack = [session.athlete, session.athlete_id, session.date, session.session_id, session.action_type]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return haystack.includes(keyword);
+        })
+        : sessions;
+
+    summarizePicker(filtered.length, sessions.length, keyword);
+
+    if (!filtered.length) {
+        reportPicker.appendChild(createEmptyState(keyword ? '没有匹配的发球报告。' : '暂无可选发球报告。'));
+        return;
+    }
+
+    groupSessionsByAthlete(filtered).forEach((group) => {
+        const section = document.createElement('section');
+        section.className = 'report-group';
+
+        const title = document.createElement('h3');
+        title.className = 'report-group-title';
+        title.textContent = group.athlete;
+
+        const meta = document.createElement('p');
+        meta.className = 'report-group-meta';
+        meta.textContent = `共 ${group.items.length} 份报告`;
+
+        const grid = document.createElement('div');
+        grid.className = 'report-group-grid';
+        group.items.forEach((session) => grid.appendChild(createReportChip(session)));
+
+        section.appendChild(title);
+        section.appendChild(meta);
+        section.appendChild(grid);
+        reportPicker.appendChild(section);
+    });
 }
 
 function renderStory(data) {
@@ -169,7 +279,7 @@ function renderClips(items) {
         card.innerHTML = `
             <div class="clip-header">
                 <h3 class="clip-title">${clip.clip_id}</h3>
-                <div class="clip-time">${formatSeconds(clip.time_start)} - ${formatSeconds(clip.time_end)} · ${clip.duration_seconds.toFixed(1)}s</div>
+                <div class="clip-time">${formatSeconds(clip.time_start)} - ${formatSeconds(clip.time_end)} · ${(clip.duration_seconds || 0).toFixed(1)}s</div>
             </div>
             <div>
                 <p class="clip-label">命中问题</p>
@@ -211,18 +321,65 @@ function setErrorState(message) {
     helperText.textContent = '如果 file:// 页面拦截了读取，请先启动本地静态服务器，或者手动选择报告 JSON。';
 }
 
+async function loadJson(path) {
+    const response = await fetch(path, { cache: 'no-store' });
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+}
+
+async function loadServeSessions() {
+    const summary = await loadJson(trainingSummaryPath);
+    const sessions = Array.isArray(summary.sessions) ? [...summary.sessions] : [];
+    allServeSessions = sessions
+        .filter((session) => session.action_type === 'serve' && session.serve_report_json)
+        .sort((a, b) => `${b.date || ''}${b.session_id || ''}`.localeCompare(`${a.date || ''}${a.session_id || ''}`));
+    renderReportPicker(allServeSessions);
+    return allServeSessions;
+}
+
+async function resolveDefaultReportPath() {
+    if (requestedFile) {
+        return requestedFile;
+    }
+
+    const sessions = allServeSessions.length ? allServeSessions : await loadServeSessions();
+    const serveSession = sessions.find((session) => session.serve_report_json);
+    if (!serveSession) {
+        throw new Error('No serve_report_json was found in training-summary.json');
+    }
+
+    return `../${serveSession.serve_report_json}`;
+}
+
 async function loadFromPath(path) {
     try {
-        const response = await fetch(path, { cache: 'no-store' });
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
+        const data = await loadJson(path);
+        currentDataPath = path;
+        clearActiveReportButtons();
+        const active = document.querySelector(`.report-chip[data-path="${CSS.escape(path)}"]`);
+        if (active) {
+            active.classList.add('active');
         }
-        const data = await response.json();
         renderReport(data);
         setLoadedState(`Loaded serve report from <code>${path}</code>.`);
     } catch (error) {
         renderReport({});
         setErrorState(`Auto-load failed for <code>${path}</code>. ${error.message}`);
+    }
+}
+
+async function loadInitialReport() {
+    try {
+        if (!allServeSessions.length) {
+            await loadServeSessions();
+        }
+        const path = await resolveDefaultReportPath();
+        await loadFromPath(path);
+    } catch (error) {
+        renderReport({});
+        setErrorState(`Could not determine a default serve report. ${error.message}`);
     }
 }
 
@@ -233,6 +390,7 @@ async function loadFromFile(file) {
     try {
         const text = await file.text();
         const data = JSON.parse(text);
+        clearActiveReportButtons();
         renderReport(data);
         setLoadedState(`Loaded serve report from selected file <code>${file.name}</code>.`);
     } catch (error) {
@@ -240,7 +398,18 @@ async function loadFromFile(file) {
     }
 }
 
-reloadButton.addEventListener('click', () => loadFromPath(defaultDataPath));
+reloadButton.addEventListener('click', () => {
+    if (currentDataPath) {
+        loadFromPath(currentDataPath);
+        return;
+    }
+    loadInitialReport();
+});
+
+if (reportSearch) {
+    reportSearch.addEventListener('input', () => renderReportPicker(allServeSessions));
+}
+
 uploadInput.addEventListener('change', (event) => loadFromFile(event.target.files?.[0]));
 
-loadFromPath(defaultDataPath);
+loadInitialReport();

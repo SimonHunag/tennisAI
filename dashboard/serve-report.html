@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@
             </div>
             <div class="hero-panel">
                 <p class="panel-label">Data Source</p>
-                <p id="source-status" class="panel-value">Trying to load <code>../analysis/Serving_practice_1-serve-report.json</code>...</p>
+                <p id="source-status" class="panel-value">Trying to load a serve-report JSON file...</p>
                 <div class="loader-actions">
                     <button id="reload-button" type="button">Reload</button>
                     <label class="file-picker" for="json-upload">Choose JSON</label>
@@ -28,6 +28,21 @@
                     如果本地浏览器拦截了自动读取，可以先启动一个简单静态服务器，或者手动选择生成好的报告 JSON。
                 </p>
             </div>
+        </section>
+
+        <section class="card report-picker-card">
+            <div class="section-heading">
+                <p class="eyebrow">Reports</p>
+                <h2>可选发球报告</h2>
+            </div>
+            <div class="report-toolbar">
+                <label class="report-search">
+                    <span>搜索球员 / 日期 / 会话</span>
+                    <input id="report-search" type="search" placeholder="例如 simon 或 2026-03-03">
+                </label>
+                <p id="report-picker-summary" class="subtle-text">正在读取可用报告...</p>
+            </div>
+            <div id="report-picker" class="report-picker"></div>
         </section>
 
         <section class="overview-grid">

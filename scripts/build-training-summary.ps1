@@ -121,6 +121,29 @@ function Get-AutoAnalysisSummary {
     }
 }
 
+function Get-ServeReportSummary {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$AnalysisDir,
+        [Parameter(Mandatory = $true)]
+        [string]$AthleteId,
+        [Parameter(Mandatory = $true)]
+        [string]$ActionType,
+        [Parameter(Mandatory = $true)]
+        [string]$SessionId
+    )
+
+    $serveReportJson = Join-Path $AnalysisDir $AthleteId
+    $serveReportJson = Join-Path $serveReportJson $ActionType
+    $serveReportJson = Join-Path $serveReportJson $SessionId
+    $serveReportJson = Join-Path $serveReportJson "$SessionId-serve-report.json"
+    if (-not (Test-Path -LiteralPath $serveReportJson -PathType Leaf)) {
+        return $null
+    }
+
+    return Get-Content -LiteralPath $serveReportJson -Raw -Encoding UTF8 | ConvertFrom-Json
+}
+
 $parsedDateFrom = Convert-ToNullableDate -Value $DateFrom -FieldName "DateFrom"
 $parsedDateTo = Convert-ToNullableDate -Value $DateTo -FieldName "DateTo"
 
@@ -143,6 +166,7 @@ $metadataFiles = Get-ChildItem -LiteralPath $resolvedAnalysisDir -Recurse -File 
         $_.Name -ne "training-summary.json" -and
         $_.Name -notlike "*-batch-analysis.json" -and
         $_.Name -notlike "*-clips.json" -and
+        $_.Name -notlike "*-segments.json" -and
         $_.Name -notlike "*-serve-report.json" -and
         $_.Name -notlike "*-comparison.json"
     }
@@ -156,6 +180,17 @@ $sessions = @(
         $item = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
         $sessionDate = Convert-ToNullableDate -Value $item.date -FieldName "session date"
         $autoAnalysis = Get-AutoAnalysisSummary -AnalysisDir $resolvedAnalysisDir -SessionId $item.session_id
+        $serveReport = Get-ServeReportSummary -AnalysisDir $resolvedAnalysisDir -AthleteId $item.athlete_id -ActionType $item.action_type -SessionId $item.session_id
+        $serveReportJsonPath = if ($serveReport) {
+            ("analysis/{0}/{1}/{2}/{2}-serve-report.json" -f $item.athlete_id, $item.action_type, $item.session_id).Replace('\', '/')
+        }
+        else {
+            $null
+        }
+        $focusPoints = if ($serveReport) { @($serveReport.priority_focus | ForEach-Object { $_.name }) } else { @($item.focus_points) }
+        $strengths = if ($serveReport) { @($serveReport.strengths | ForEach-Object { $_.name }) } else { @($item.strengths) }
+        $issues = if ($serveReport) { @($serveReport.common_issues | ForEach-Object { $_.label }) } else { @($item.issues) }
+        $nextSteps = if ($serveReport) { @($serveReport.training_priorities) } else { @($item.next_steps) }
 
         [PSCustomObject]@{
             SessionId = $item.session_id
@@ -167,14 +202,15 @@ $sessions = @(
             Coach = $item.coach
             CameraView = $item.camera_view
             SessionTags = @($item.session_tags)
-            FocusPoints = @($item.focus_points)
-            Strengths = @($item.strengths)
-            Issues = @($item.issues)
-            NextSteps = @($item.next_steps)
+            FocusPoints = $focusPoints
+            Strengths = $strengths
+            Issues = $issues
+            NextSteps = $nextSteps
             Consistency = $item.metrics.consistency_score
             Balance = $item.metrics.balance_score
             Timing = $item.metrics.timing_score
             ReportPath = $item.report_path
+            ServeReportJson = $serveReportJsonPath
             SourceVideo = $item.source_video
             ReferenceVideo = $item.reference_video
             AutoAnalysis = $autoAnalysis
@@ -338,9 +374,16 @@ if ($ActionType -and $ActionType.Count) {
     }
 }
 
+$dashboardAthletes = New-Object System.Collections.ArrayList
+if ($Athlete -and $Athlete.Count) {
+    foreach ($item in $Athlete) {
+        [void]$dashboardAthletes.Add($item)
+    }
+}
+
 $dashboardFilters = [PSCustomObject]@{
     action_types = $dashboardActionTypes
-    athletes = if ($Athlete -and $Athlete.Count) { @($Athlete) } else { @() }
+    athletes = $dashboardAthletes
     date_from = if ($DateFrom) { $DateFrom } else { $null }
     date_to = if ($DateTo) { $DateTo } else { $null }
 }
@@ -409,6 +452,7 @@ $dashboardData = [PSCustomObject]@{
                     timing = $session.Timing
                 }
                 report_path = $session.ReportPath
+                serve_report_json = $session.ServeReportJson
                 source_video = $session.SourceVideo
                 reference_video = $session.ReferenceVideo
                 auto_analysis = if ($session.AutoAnalysis) {

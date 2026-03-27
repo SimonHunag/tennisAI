@@ -29,9 +29,9 @@ ISSUE_EXPLANATIONS = {
     "limited_weight_transfer": "身体没有明显向前送入场内，力量链条会断在中段。",
     "limited_leg_drive": "屈膝加载和向上蹬伸不够，发球会更像手臂在打。",
     "contact_arm_not_extended": "触球瞬间手臂没有充分伸展，会限制击球高度和力量释放。",
-    "contact_angle_too_closed": "击球时肩臂夹角偏小，容易让击球线路偏挤、向上发力不充分。",
+    "contact_angle_too_closed": "击球时肩臂夹角偏小，容易让击球线路偏挤，向上发力不够完整。",
     "incomplete_follow_through": "击球后收拍过早停止，动作链条容易断掉。",
-    "finish_not_across_body": "收拍没有自然走到身体对侧，说明随挥流动性不足。",
+    "finish_not_across_body": "收拍没有自然走到身体对侧，说明随挥流动性不够。",
 }
 
 ISSUE_TRAINING = {
@@ -46,24 +46,24 @@ ISSUE_TRAINING = {
 }
 
 STRENGTH_TRANSLATIONS = {
-    "Contact height is within a useful serve range.": "击球高度整体还在可用范围内。",
-    "Contact point is reasonably forward of the hips.": "击球点相对髋部的位置还算靠前。",
-    "Hip shift suggests useful forward momentum.": "髋部前送有一定基础，说明向前发力并不是完全缺失。",
-    "Arm extension at contact looks reasonably complete.": "击球瞬间手臂伸展还算完整。",
-    "Contact angle suggests a useful upward hitting line.": "击球角度整体有一定向上击打的基础。",
-    "Follow-through drops naturally after contact.": "击球后的下落和随挥还算自然。",
-    "Finish position travels across the body with useful flow.": "收拍有一定过身流动性。",
+    "Contact height is within a useful serve range.": "击球高度整体还在可用范围内",
+    "Contact point is reasonably forward of the hips.": "击球点相对髋部的位置还算靠前",
+    "Hip shift suggests useful forward momentum.": "髋部前送有一定基础，说明向前发力并不是完全缺失",
+    "Arm extension at contact looks reasonably complete.": "击球瞬间手臂伸展还算完整",
+    "Contact angle suggests a useful upward hitting line.": "击球角度整体有一定向上击打的基础",
+    "Follow-through drops naturally after contact.": "击球后的下落和随挥还算自然",
+    "Finish position travels across the body with useful flow.": "收拍有一定过身流动性",
 }
 
 FOCUS_TRANSLATIONS = {
-    "Raise contact point.": "优先抬高击球点。",
-    "Move contact slightly more in front.": "把击球点再放到身体更前方。",
-    "Improve forward hip shift.": "增强髋部和重心向前的输送。",
-    "Add more leg drive.": "补足屈膝加载和向上蹬地。",
-    "Extend the hitting arm more at contact.": "击球时把手臂伸得更完整。",
-    "Open the shoulder-arm angle at contact.": "打开击球时的肩臂夹角。",
-    "Finish the serve with a fuller follow-through.": "把收拍做完整。",
-    "Let the finish travel more across the body.": "让收拍更自然地过身。",
+    "Raise contact point.": "优先抬高击球点",
+    "Move contact slightly more in front.": "把击球点再放到身体更前方",
+    "Improve forward hip shift.": "增强髋部和重心向前的输送",
+    "Add more leg drive.": "补足屈膝加载和向上蹬地",
+    "Extend the hitting arm more at contact.": "击球时把手臂伸得更完整",
+    "Open the shoulder-arm angle at contact.": "打开击球时的肩臂夹角",
+    "Finish the serve with a fuller follow-through.": "把收拍做完整",
+    "Let the finish travel more across the body.": "让收拍更自然地过身",
 }
 
 
@@ -94,24 +94,41 @@ def format_seconds(value: float) -> str:
 def format_metric(name: str, value: Any) -> str:
     if value is None:
         return "未稳定识别"
-    if name in {"contact_wrist_height", "contact_wrist_forward_offset", "hip_shift", "wrist_vertical_range", "finish_wrist_shoulder_offset", "follow_through_drop", "finish_cross_body_offset"}:
+    if name in {
+        "contact_wrist_height",
+        "contact_wrist_forward_offset",
+        "hip_shift",
+        "wrist_vertical_range",
+        "finish_wrist_shoulder_offset",
+        "follow_through_drop",
+        "finish_cross_body_offset",
+    }:
         return f"{value:.3f}"
-    if name in {"average_knee_flexion", "contact_elbow_angle", "contact_shoulder_angle", "finish_elbow_angle"}:
+    if name in {
+        "average_knee_flexion",
+        "contact_elbow_angle",
+        "contact_shoulder_angle",
+        "finish_elbow_angle",
+    }:
         return f"{value:.1f}"
     return str(value)
 
 
+def strip_sentence_suffix(text: str) -> str:
+    return text.rstrip(".。")
+
+
 def translate_strength(text: str) -> str:
-    return STRENGTH_TRANSLATIONS.get(text, text).rstrip(".。 ")
+    return strip_sentence_suffix(STRENGTH_TRANSLATIONS.get(text, text))
 
 
 def translate_focus(text: str) -> str:
-    return FOCUS_TRANSLATIONS.get(text, text).rstrip(".。 ")
+    return strip_sentence_suffix(FOCUS_TRANSLATIONS.get(text, text))
 
 
 def build_overall_assessment(issue_counter: Counter[str]) -> str:
     if not issue_counter:
-        return "这组发球暂时没有命中明显的规则问题，但仍建议结合视频做人工复核。"
+        return "这组发球暂时没有命中明显的规则问题，但仍建议结合视频做人工作复核。"
 
     top_issue, top_count = issue_counter.most_common(1)[0]
     label = ISSUE_LABELS.get(top_issue, top_issue)
@@ -190,19 +207,11 @@ def build_report_payload(batch_data: dict[str, Any]) -> dict[str, Any]:
             }
             for code, count in issue_counter.most_common()
         ],
-        "priority_focus": [
-            {"name": text, "count": count}
-            for text, count in focus_counter.most_common(3)
-        ],
+        "priority_focus": [{"name": text, "count": count} for text, count in focus_counter.most_common(3)],
         "training_priorities": choose_training_priorities(issue_counter),
-        "strengths": [
-            {"name": text, "count": count}
-            for text, count in strength_counter.most_common(3)
-        ],
+        "strengths": [{"name": text, "count": count} for text, count in strength_counter.most_common(3)],
         "metric_overview": [
-            {"name": key, "average": round(mean(metric_values[key]), 3)}
-            for key in metric_order
-            if metric_values.get(key)
+            {"name": key, "average": round(mean(metric_values[key]), 3)} for key in metric_order if metric_values.get(key)
         ],
         "clips": [
             {
@@ -210,10 +219,7 @@ def build_report_payload(batch_data: dict[str, Any]) -> dict[str, Any]:
                 "time_start": clip.time_start,
                 "time_end": clip.time_end,
                 "duration_seconds": clip.duration_seconds,
-                "issues": [
-                    {"code": code, "label": ISSUE_LABELS.get(code, code)}
-                    for code in clip.issue_codes
-                ],
+                "issues": [{"code": code, "label": ISSUE_LABELS.get(code, code)} for code in clip.issue_codes],
                 "next_focus": [translate_focus(text) for text in clip.next_focus],
                 "strengths": [translate_strength(text) for text in clip.strengths],
                 "metrics": clip.metrics,
@@ -224,9 +230,7 @@ def build_report_payload(batch_data: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Generate a Chinese markdown report from multi-clip serve analysis."
-    )
+    parser = argparse.ArgumentParser(description="Generate a Chinese markdown report from multi-clip serve analysis.")
     parser.add_argument(
         "--batch-analysis",
         required=True,
@@ -257,6 +261,7 @@ def main() -> int:
         if args.json_output
         else batch_path.with_name(batch_path.stem.replace("-batch-analysis", "") + "-serve-report.json")
     )
+
     report_payload = build_report_payload(batch_data)
     clip_reports = [
         ClipReport(
@@ -330,9 +335,7 @@ def main() -> int:
     for clip in clip_reports:
         lines.append(f"### {clip.clip_id}")
         lines.append("")
-        lines.append(
-            f"- 时间范围: `{format_seconds(clip.time_start)} - {format_seconds(clip.time_end)}`，时长 `{clip.duration_seconds:.1f}s`"
-        )
+        lines.append(f"- 时间范围: `{format_seconds(clip.time_start)} - {format_seconds(clip.time_end)}`，时长 `{clip.duration_seconds:.1f}s`")
         if clip.issue_codes:
             labels = "，".join(ISSUE_LABELS.get(code, code) for code in clip.issue_codes)
             lines.append(f"- 命中问题: {labels}")

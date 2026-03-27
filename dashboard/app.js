@@ -159,12 +159,18 @@ function renderSessionTable(sessions) {
 
     sessions.forEach((session) => {
         const autoAnalysis = session.auto_analysis || null;
+        const reportLink = session.serve_report_json
+            ? `serve-report.html?file=${encodeURIComponent(`../${session.serve_report_json}`)}`
+            : null;
+        const sessionTitleMarkup = reportLink
+            ? `<a class="session-link" href="${reportLink}">${session.session_id || '-'}</a>`
+            : `${session.session_id || '-'}`;
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="session-cell">${session.date || '-'}</td>
             <td class="session-cell">${session.athlete || session.athlete_id || '-'}</td>
             <td class="session-cell">
-                <div class="session-title">${session.session_id || '-'}</div>
+                <div class="session-title">${sessionTitleMarkup}</div>
                 <div class="session-badges">${badgeMarkup(session.session_tags)}</div>
             </td>
             <td class="session-cell">${session.action_type || '-'}</td>
