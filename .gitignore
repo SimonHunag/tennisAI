@@ -19,6 +19,7 @@ analysis/**/*.png
 
 # Local model assets
 assets/models/*.task
+!assets/models/pose_landmarker.task
 
 # Logs and local runtime files
 *.log
