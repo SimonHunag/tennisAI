@@ -1,0 +1,42 @@
+{
+  "session_id": "2026-03-25-serve-side-view",
+  "action_type": "serve",
+  "generated_at": "2026-03-25T18:30:00",
+  "phases": {
+    "ready_frame": 0,
+    "contact_frame": 12,
+    "finish_frame": 25
+  },
+  "metrics": {
+    "contact_wrist_height": 0.18,
+    "contact_wrist_forward_offset": 0.09,
+    "contact_elbow_angle": 168.0,
+    "contact_shoulder_angle": 118.0,
+    "hip_shift": 0.06,
+    "average_knee_flexion": 146.0,
+    "wrist_vertical_range": 0.34,
+    "finish_elbow_angle": 124.0,
+    "finish_wrist_shoulder_offset": 0.22,
+    "follow_through_drop": 0.14,
+    "finish_cross_body_offset": 0.08
+  },
+  "issues": [
+    {
+      "issue_code": "low_contact_point",
+      "severity": "medium",
+      "message": "Contact wrist height is lower than the recommended serve range.",
+      "recommendations": [
+        "Reach up more at contact.",
+        "Improve trophy position before the upward swing.",
+        "Check whether the toss drops too low before contact."
+      ]
+    }
+  ],
+  "strengths": [
+    "Good forward hip shift through contact."
+  ],
+  "next_focus": [
+    "Raise contact point.",
+    "Keep the toss slightly more in front."
+  ]
+}

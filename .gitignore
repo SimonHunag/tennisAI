@@ -1,0 +1,31 @@
+videos/
+frames/
+tmp/
+
+# Generated analysis artifacts
+analysis/**/*.json
+analysis/**/*.md
+analysis/**/*.csv
+analysis/**/*.mp4
+analysis/**/*.jpg
+analysis/**/*.jpeg
+analysis/**/*.png
+
+# Keep templates and project docs
+!analysis/template.md
+!analysis/metadata-template.json
+!analysis/pose-template.json
+!analysis/auto-analysis-template.json
+
+# Local model assets
+assets/models/*.task
+
+# Logs and local runtime files
+*.log
+*.err
+*.tmp
+__pycache__/
+scripts/__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store

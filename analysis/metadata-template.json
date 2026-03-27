@@ -1,0 +1,28 @@
+{
+  "session_id": "",
+  "session_name": "",
+  "date": "",
+  "athlete": "",
+  "athlete_id": "",
+  "coach": "",
+  "action_type": "other",
+  "action_family": "other",
+  "camera_view": "unspecified",
+  "session_tags": [],
+  "video_dir": "",
+  "frame_dir": "",
+  "report_path": "",
+  "source_video": "",
+  "reference_video": "",
+  "frame_interval_seconds": 1,
+  "focus_points": [],
+  "strengths": [],
+  "issues": [],
+  "next_steps": [],
+  "metrics": {
+    "consistency_score": null,
+    "balance_score": null,
+    "timing_score": null
+  },
+  "notes": []
+}

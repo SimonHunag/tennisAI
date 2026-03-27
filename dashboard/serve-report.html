@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TennisAI Serve Report</title>
+    <link rel="stylesheet" href="serve-report.css">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">Serve Report</p>
+                <h1>发球视频分析报告</h1>
+                <p class="hero-text">
+                    这个页面读取 <code>analysis/*-serve-report.json</code>，把整条发球训练视频拆成更直观的总结、共性问题和逐段结论。
+                </p>
+            </div>
+            <div class="hero-panel">
+                <p class="panel-label">Data Source</p>
+                <p id="source-status" class="panel-value">Trying to load <code>../analysis/Serving_practice_1-serve-report.json</code>...</p>
+                <div class="loader-actions">
+                    <button id="reload-button" type="button">Reload</button>
+                    <label class="file-picker" for="json-upload">Choose JSON</label>
+                    <input id="json-upload" type="file" accept=".json,application/json">
+                </div>
+                <p id="helper-text" class="helper-text">
+                    如果本地浏览器拦截了自动读取，可以先启动一个简单静态服务器，或者手动选择生成好的报告 JSON。
+                </p>
+            </div>
+        </section>
+
+        <section class="overview-grid">
+            <article class="card story-card">
+                <div class="section-heading">
+                    <p class="eyebrow">Overall</p>
+                    <h2>整体判断</h2>
+                </div>
+                <p id="overall-assessment" class="story-text"></p>
+                <div id="training-priorities" class="callout-list"></div>
+            </article>
+
+            <article class="card stat-card-group">
+                <div class="section-heading">
+                    <p class="eyebrow">Snapshot</p>
+                    <h2>关键概览</h2>
+                </div>
+                <div id="stats-grid" class="stats-grid"></div>
+            </article>
+        </section>
+
+        <section class="insight-grid">
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Common Issues</p>
+                    <h2>共性问题</h2>
+                </div>
+                <div id="common-issues" class="issue-stack"></div>
+            </article>
+
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Strengths</p>
+                    <h2>当前基础</h2>
+                </div>
+                <div id="strengths" class="pill-list"></div>
+                <div class="section-heading compact-heading">
+                    <p class="eyebrow">Metrics</p>
+                    <h2>指标概览</h2>
+                </div>
+                <div id="metric-overview" class="metric-grid"></div>
+            </article>
+        </section>
+
+        <section class="card clips-card">
+            <div class="section-heading">
+                <p class="eyebrow">Clip Review</p>
+                <h2>逐段结果</h2>
+            </div>
+            <div id="clip-grid" class="clip-grid"></div>
+        </section>
+    </main>
+
+    <template id="empty-state-template">
+        <div class="empty-state">
+            <p>暂无可展示的数据。</p>
+        </div>
+    </template>
+
+    <script src="serve-report.js"></script>
+</body>
+</html>

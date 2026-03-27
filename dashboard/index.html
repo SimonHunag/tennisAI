@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TennisAI Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="page-shell">
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">TennisAI Dashboard</p>
+                <h1>Training trends, focus areas, and session history in one local view.</h1>
+                <p class="hero-text">
+                    This page reads <code>analysis/training-summary.json</code> and turns it into a lightweight dashboard.
+                </p>
+            </div>
+            <div class="hero-panel">
+                <p class="panel-label">Data Source</p>
+                <p id="source-status" class="panel-value">Trying to load <code>../analysis/training-summary.json</code>...</p>
+                <div class="loader-actions">
+                    <button id="reload-button" type="button">Reload</button>
+                    <label class="file-picker" for="json-upload">Choose JSON</label>
+                    <a class="file-picker" href="serve-report.html">Serve Report</a>
+                    <input id="json-upload" type="file" accept=".json,application/json">
+                </div>
+                <p id="helper-text" class="helper-text">
+                    If auto-loading fails, run a simple local server or choose the generated JSON file manually.
+                </p>
+            </div>
+        </section>
+
+        <section class="filters-card">
+            <div class="section-heading">
+                <p class="eyebrow">Active Filters</p>
+                <h2>Current summary scope</h2>
+            </div>
+            <div id="filters-grid" class="filters-grid"></div>
+        </section>
+
+        <section class="stats-grid" id="stats-grid"></section>
+
+        <section class="content-grid">
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Action Mix</p>
+                    <h2>Session distribution</h2>
+                </div>
+                <div id="action-breakdown" class="metric-list"></div>
+            </article>
+
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Top Focus</p>
+                    <h2>Most repeated priorities</h2>
+                </div>
+                <div id="focus-breakdown" class="metric-list"></div>
+            </article>
+
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Top Issues</p>
+                    <h2>Recurring technical problems</h2>
+                </div>
+                <div id="issue-breakdown" class="metric-list"></div>
+            </article>
+
+            <article class="card">
+                <div class="section-heading">
+                    <p class="eyebrow">Auto Flags</p>
+                    <h2>Most detected rule hits</h2>
+                </div>
+                <div id="auto-issue-breakdown" class="metric-list"></div>
+            </article>
+        </section>
+
+        <section class="card sessions-card">
+            <div class="section-heading">
+                <p class="eyebrow">Sessions</p>
+                <h2>Session timeline</h2>
+            </div>
+            <div id="session-table" class="session-table"></div>
+        </section>
+    </main>
+
+    <template id="empty-state-template">
+        <div class="empty-state">
+            <p>No data available yet.</p>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>

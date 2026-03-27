@@ -1,0 +1,33 @@
+{
+  "session_id": "2026-03-25-serve-side-view",
+  "action_type": "serve",
+  "coordinate_system": {
+    "origin": "top_left",
+    "x_range": [0.0, 1.0],
+    "y_range": [0.0, 1.0],
+    "note": "Smaller y means higher in the frame."
+  },
+  "fps": 30,
+  "handedness": "right",
+  "frames": [
+    {
+      "frame_index": 0,
+      "timestamp": 0.0,
+      "keypoints": {
+        "nose": { "x": 0.50, "y": 0.22, "confidence": 0.99 },
+        "left_shoulder": { "x": 0.44, "y": 0.32, "confidence": 0.98 },
+        "right_shoulder": { "x": 0.57, "y": 0.31, "confidence": 0.98 },
+        "left_elbow": { "x": 0.39, "y": 0.43, "confidence": 0.97 },
+        "right_elbow": { "x": 0.63, "y": 0.40, "confidence": 0.97 },
+        "left_wrist": { "x": 0.35, "y": 0.52, "confidence": 0.96 },
+        "right_wrist": { "x": 0.69, "y": 0.48, "confidence": 0.96 },
+        "left_hip": { "x": 0.46, "y": 0.56, "confidence": 0.98 },
+        "right_hip": { "x": 0.55, "y": 0.56, "confidence": 0.98 },
+        "left_knee": { "x": 0.44, "y": 0.76, "confidence": 0.95 },
+        "right_knee": { "x": 0.56, "y": 0.75, "confidence": 0.95 },
+        "left_ankle": { "x": 0.43, "y": 0.94, "confidence": 0.94 },
+        "right_ankle": { "x": 0.58, "y": 0.93, "confidence": 0.94 }
+      }
+    }
+  ]
+}
